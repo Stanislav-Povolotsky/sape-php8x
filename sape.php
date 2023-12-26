@@ -129,6 +129,8 @@ class SAPE_base
 
     protected $_user_agent = '';
 
+    protected $_page_obligatory_output = '';
+
     public function __construct($options = null)
     {
 
