@@ -12,6 +12,9 @@
  * Вы можете найти здесь:
  * @link https://support.sape.ru/l_rus/knowledge_base/category/51114
  * @link https://support.sape.ru/l_rus/knowledge_base/item/232345
+ * 
+ * Обновлённая версия хранится тут:
+ * @link https://github.com/Stanislav-Povolotsky/sape-php8x
  *
  */
 
@@ -85,6 +88,14 @@ class SAPE_base
     protected $_ignore_case = false;
 
     /**
+     * Базовый путь ко всем файлам с данными.
+     * Рекомендуется не хранить код вместе с данными, поэтому путь по-умолчанию был изменён на /db/
+     * Можно задавать через $options['db_dir']
+     * @var string
+     */
+    protected $_db_dir = dirname(__FILE__) . "/db/";
+
+    /**
      * Путь к файлу с данными
      * @var string
      */
@@ -134,6 +145,13 @@ class SAPE_base
             $options = array();
         } else {
             $options = array();
+        }
+
+        if (isset($options['db_dir'])) {
+            $this->_db_dir = $options['db_dir'];
+        }
+        if(substr($this->_db_dir, -1) !== '/') {
+ 	    $this->_db_dir .= "/";
         }
 
         if (isset($options['use_server_array']) && $options['use_server_array'] == true) {
@@ -1291,18 +1309,18 @@ class SAPE_client extends SAPE_base
     protected function _get_db_file()
     {
         if ($this->_multi_site) {
-            return dirname(__FILE__) . '/' . $this->_host . '.links' . $this->_get_save_filename_prefix() . '.db';
+            return $this->_db_dir . $this->_host . '.links' . $this->_get_save_filename_prefix() . '.db';
         } else {
-            return dirname(__FILE__) . '/links' . $this->_get_save_filename_prefix() . '.db';
+            return $this->_db_dir . 'links' . $this->_get_save_filename_prefix() . '.db';
         }
     }
 
     protected function _get_meta_file()
     {
         if ($this->_multi_site) {
-            return dirname(__FILE__) . '/' . $this->_host . '.links.meta.db';
+            return $this->_db_dir . $this->_host . '.links.meta.db';
         } else {
-            return dirname(__FILE__) . '/links.meta.db';
+            return $this->_db_dir . 'links.meta.db';
         }
     }
 
@@ -1424,7 +1442,7 @@ class SAPE_client extends SAPE_base
     protected function _save_data($data, $filename = '')
     {
         if ($this->_split_data_file) {
-            $directory = dirname(__FILE__) . '/';
+            $directory = $this->_db_dir;
             $hashArray = array();
             $data = $this->_uncode_data($data);
             foreach ($data as $url => $item) {
@@ -1777,18 +1795,18 @@ class SAPE_context extends SAPE_base
     protected function _get_db_file()
     {
         if ($this->_multi_site) {
-            return dirname(__FILE__) . '/' . $this->_host . '.words' . $this->_get_save_filename_prefix() . '.db';
+            return $this->_db_dir . $this->_host . '.words' . $this->_get_save_filename_prefix() . '.db';
         } else {
-            return dirname(__FILE__) . '/words' . $this->_get_save_filename_prefix() . '.db';
+            return $this->_db_dir . 'words' . $this->_get_save_filename_prefix() . '.db';
         }
     }
 
     protected function _get_meta_file()
     {
         if ($this->_multi_site) {
-            return dirname(__FILE__) . '/' . $this->_host . '.words.meta.db';
+            return $this->_db_dir . $this->_host . '.words.meta.db';
         } else {
-            return dirname(__FILE__) . '/words.meta.db';
+            return $this->_db_dir . 'words.meta.db';
         }
     }
 
@@ -1834,7 +1852,7 @@ class SAPE_context extends SAPE_base
     protected function _save_data($data, $filename = '')
     {
         if ($this->_split_data_file) {
-            $directory = dirname(__FILE__) . '/';
+            $directory = $this->_db_dir;
             $hashArray = array();
             $data = $this->_uncode_data($data);
             foreach ($data as $url => $item) {
@@ -2114,7 +2132,7 @@ class SAPE_articles extends SAPE_base
     {
         if (isset($posts) && is_array($posts)) {
             $this->_save_file_name = 'articles.wp.db';
-            $this->_db_file        = dirname(__FILE__) . '/' . $this->_host . '.' . $this->_save_file_name;
+            $this->_db_file        = $this->_db_dir . $this->_host . '.' . $this->_save_file_name;
 
             foreach ($posts as $articleId => $post) {
                 if (in_array($mode, array('add', 'update'))) {
@@ -2257,7 +2275,7 @@ class SAPE_articles extends SAPE_base
 
     protected function _prepare_path_to_images()
     {
-        $this->_images_path = dirname(__FILE__) . '/images/';
+        $this->_images_path = $this->_db_dir . 'images/';
         if (!is_dir($this->_images_path)) {
             // Пытаемся создать папку.
             if (@mkdir($this->_images_path)) {
@@ -2612,9 +2630,9 @@ class SAPE_articles extends SAPE_base
     protected function _get_db_file()
     {
         if ($this->_multi_site) {
-            return dirname(__FILE__) . '/' . $this->_host . '.' . $this->_save_file_name;
+            return $this->_db_dir . $this->_host . '.' . $this->_save_file_name;
         } else {
-            return dirname(__FILE__) . '/' . $this->_save_file_name;
+            return $this->_db_dir . $this->_save_file_name;
         }
     }
 
@@ -2632,7 +2650,7 @@ class SAPE_articles extends SAPE_base
      */
     protected function _load_wp_data()
     {
-        $this->_db_file = dirname(__FILE__) . '/' . $this->_host . '.' . $this->_save_file_name;
+        $this->_db_file = $this->_db_dir . $this->_host . '.' . $this->_save_file_name;
         $this->_db_file = mb_strtolower($this->_db_file, 'UTF-8');
 
         if (!file_exists($this->_db_file)) {
@@ -2767,10 +2785,10 @@ class SAPE_rtb extends SAPE_base
     protected function _get_db_file()
     {
         if ($this->_ucode_id) {
-            return dirname(__FILE__) . '/rtb.ucode.' . $this->_ucode_id . '.' . $this->_host . '.db';
+            return $this->_db_dir . 'rtb.ucode.' . $this->_ucode_id . '.' . $this->_host . '.db';
         }
 
-        return dirname(__FILE__) . '/rtb.site.' . $this->_site_id . '.' . $this->_host . '.db';
+        return $this->_db_dir . 'rtb.site.' . $this->_site_id . '.' . $this->_host . '.db';
     }
 
     /**
@@ -2792,7 +2810,7 @@ class SAPE_rtb extends SAPE_base
      */
     protected function _load_proxed_url()
     {
-        $db_file = dirname(__FILE__) . '/rtb.proxy.db';
+        $db_file = $this->_db_dir . 'rtb.proxy.db';
         if (!is_file($db_file)) {
             if (@touch($db_file)) {
                 @chmod($db_file, 0666); // Права доступа
@@ -2856,7 +2874,7 @@ class SAPE_rtb extends SAPE_base
         }
 
         $this->_write($this->_base_dir . $this->_filename, $code);
-        $this->_write(dirname(__FILE__) . '/rtb.proxy.db', $this->_code_data($data['__proxy__']));
+        $this->_write($this->_db_dir . 'rtb.proxy.db', $this->_code_data($data['__proxy__']));
     }
 
     /**
