@@ -93,7 +93,7 @@ class SAPE_base
      * Можно задавать через $options['db_dir']
      * @var string
      */
-    protected $_db_dir = dirname(__FILE__) . "/db/";
+    protected $_db_dir = "./db/";
 
     /**
      * Путь к файлу с данными
@@ -147,6 +147,7 @@ class SAPE_base
             $options = array();
         }
 
+        $this->_db_dir = dirname(__FILE__) . "/db/";
         if (isset($options['db_dir'])) {
             $this->_db_dir = $options['db_dir'];
         }
